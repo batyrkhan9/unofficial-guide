@@ -1,26 +1,9 @@
-# The Unofficial Guide — Project 1
+# The Unofficial Guide 
 
-> **How to use this template:**
-> Complete each section *after* you've built and tested the corresponding part of your system.
-> Do not write placeholder text — if a section isn't done yet, leave it blank and come back.
-> Every section below is required for submission. One-liners will not receive full credit.
-
----
-
-## Domain
-
-<!-- What topic or category of knowledge does your system cover?
-     Why is this knowledge valuable, and why is it hard to find through official channels?
-     Example: "Student reviews of CS professors at [university] — useful because official
-     course descriptions don't reflect teaching style, exam difficulty, or workload." -->
 This project builds an unofficial guide to Minerva University professors using student reviews collected from Rate My Professors. The domain covers 14 professors across Computer Science, Social Sciences, Arts and Humanities, and Business. This knowledge is valuable because it gives students honest insight into teaching style, exam difficulty, and grading fairness, information that is never shared through official Minerva channels because it is too candid and informal to appear in any university publication.
 ---
 
 ## Document Sources
-
-<!-- List every source you collected documents from.
-     Be specific: include URLs, subreddit names, forum thread titles, or file names.
-     Aim for variety — sources that together cover different subtopics or perspectives. -->
 
 | # | Source | Type | URL or file path |
 |---|--------|------|-----------------|
@@ -44,13 +27,6 @@ This project builds an unofficial guide to Minerva University professors using s
 
 ## Chunking Strategy
 
-<!-- Describe your chunking approach with enough specificity that someone else could reproduce it.
-     Include:
-     - Chunk size (characters or tokens) and why that size fits your documents
-     - Overlap size and why (or why not) you used overlap
-     - Any preprocessing you did before chunking (e.g., stripping HTML, removing headers)
-     - What your final chunk count was across all documents -->
-
 **Chunk size:**
 Each review is one chunk, approximately 50-150 characters. Split on --- separator.
 **Overlap:**
@@ -63,12 +39,6 @@ Reviews average 2 sentences and useful information is spread across both sentenc
 
 ## Embedding Model
 
-<!-- Name the embedding model you used and explain your choice.
-     Then answer: if you were deploying this system for real users and cost wasn't a constraint,
-     what tradeoffs would you weigh in choosing a different model?
-     Consider: context length limits, multilingual support, accuracy on domain-specific text,
-     latency, and local vs. API-hosted. -->
-
 **Model used:**
 all-MiniLM-L6-v2 via sentence-transformers. Runs locally with no API key or rate limits.
 
@@ -77,13 +47,6 @@ For a production deployment, I would consider OpenAI's text-embedding-ada-002 fo
 ---
 
 ## Grounded Generation
-
-<!-- Explain how your system enforces grounding — how does it prevent the LLM from answering
-     beyond the retrieved documents?
-     Describe both your system prompt (what instruction you gave the model) and any structural
-     choices (e.g., how you formatted the context, whether you filtered low-relevance chunks).
-     Do not just say "I told it to use the documents" — show the actual instruction or explain
-     the mechanism. -->
 
 **System prompt grounding instruction:**
 You are an assistant for Minerva University students.
@@ -96,10 +59,6 @@ Source filenames are collected from ChromaDB metadata for each retrieved chunk a
 ---
 
 ## Evaluation Report
-
-<!-- Run your 5 test questions from planning.md through your system and record the results.
-     Be honest — a partially accurate or inaccurate result that you explain well is more
-     valuable than a suspiciously perfect result. -->
 
 | # | Question | Expected answer | System response (summarized) | Retrieval quality | Response accuracy |
 |---|----------|-----------------|------------------------------|-------------------|-------------------|
@@ -116,17 +75,6 @@ Source filenames are collected from ChromaDB metadata for each retrieved chunk a
 
 ## Failure Case Analysis
 
-<!-- Identify at least one question where retrieval or generation did not work as expected.
-     Write a specific explanation of *why* it failed, tied to a part of the pipeline.
-
-     "The answer was wrong" is not an explanation.
-
-     "The relevant information was split across a chunk boundary, so retrieval returned
-     only half the context — the model didn't have enough to answer correctly" is an explanation.
-
-     "The embedding model treated the professor's nickname as out-of-vocabulary and returned
-     results from an unrelated review" is an explanation. -->
-
 **Question that failed:**
 Which professor gives the most useful feedback?
 **What the system returned:**
@@ -140,36 +88,9 @@ Ensure every chunk explicitly contains the professor's name in the text. Additio
 
 ## Spec Reflection
 
-<!-- Reflect on how planning.md shaped your implementation.
-     Answer both questions with at least 2–3 sentences each. -->
-
 **One way the spec helped you during implementation:**
 Writing the chunking strategy in planning.md before coding forced me to think about the structure of my documents first. Because I had decided that each review should be one chunk split on ---, implementing the ingestion script was straightforward, I knew exactly what the output should look like before writing a single line of code.
 
 **One way your implementation diverged from the spec, and why:**
 The spec did not anticipate that professor names would be missing from chunk text, only present in filenames. This caused retrieval failures where the system found relevant content but couldn't attribute it to a specific professor. I had to go back and modify all 14 .txt files to prepend "Professor: [name]" to each review, a preprocessing step not in the original plan.
 
----
-
-## AI Usage
-
-<!-- Describe at least 2 specific instances where you used an AI tool during this project.
-     For each: what did you give the AI as input, what did it produce, and what did you
-     change, override, or direct differently?
-
-     "I used Claude to help me code" is not sufficient.
-     "I gave Claude my Chunking Strategy section from planning.md and asked it to implement
-     chunk_text(). It returned a function using a fixed character split. I overrode the
-     chunk size from 500 to 200 because my documents are short reviews, not long guides." -->
-
-**Instance 1**
-
-- *What I gave the AI:* My chunking strategy from planning.md and document structure (short reviews separated by ---) 
-- *What it produced:* An ingest.py script that loads .txt files, splits on ---, filters empty chunks, and attaches source filename as metadata
-- *What I changed or overrode:* Added professor names to each review after discovering the system couldn't attribute retrieved chunks to specific professors
-
-**Instance 2**
-
-- *What I gave the AI:* What I gave the AI: My grounding requirement and retrieval approach from planning.md
-- *What it produced:* A query.py script with a system prompt enforcing grounded generation, ChromaDB retrieval, and Groq LLM integration
-- *What I changed or overrode:* Kept k=5 for retrieval after testing showed it returned a good balance of relevant and diverse chunks
